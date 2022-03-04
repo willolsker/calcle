@@ -54,10 +54,9 @@ function Game() {
     }, [inputs, row, solution]);
 
     const date = useRef(utcToZonedTime(new Date(), "America/Los_Angeles"));
+    const dateId = useRef("" + date.current.getDate() + date.current.getMonth() + date.current.getFullYear());
     useEffect(() => {
-        const dateId = date.current.getDate() + date.current.getMonth() + date.current.getFullYear();
-    
-        const prng = pseudoRandom(dateId);
+        const prng = pseudoRandom(parseInt(dateId.current));
         const eq = generateExpression(prng);
         setSolution(eq);
 
@@ -76,8 +75,7 @@ function Game() {
 
     useEffect(() => {
         if (inputs) {
-            const dateId = date.current.getDate() + date.current.getMonth() + date.current.getFullYear();
-            localStorage.setItem("savedInputs" + dateId, JSON.stringify({data: {inputs, row}}));
+            localStorage.setItem("savedInputs" + dateId.current, JSON.stringify({data: {inputs, row}}));
         }
     }, [inputs, row]);
 
