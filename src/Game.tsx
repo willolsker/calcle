@@ -41,7 +41,7 @@ function Game() {
                             }, 300);
                         }
                     } else {
-                    setToast("The expression that you entered is not equal to the specified solution.");
+                    setToast(`The expression that you entered is not equal to the specified solution: $${simplifyExpression(solution).toTex().replace("\\cdot", "")}$`);
                 }
             } catch {
                 setToast("The expression that you entered is not valid.");
