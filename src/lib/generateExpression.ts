@@ -1,15 +1,10 @@
-import { simplify, string } from "mathjs";
 import fillExpression from "./fillExpression";
 import {Range} from "./Range";
-import simplifyExpression from "./simplifyExpression";
-import { numbers, operations } from "./values";
 
-function generateExpression(randomIterator: Iterator<number>) {
+function generateExpression(randomIterator: Iterator<number>): string {
     const rand = <Min extends number, Max extends number>(min: Min, max: Max): Range<Min, Max> => (randomIterator.next().value % (max + 1 - min) + min as Range<Min, Max>);
 
     const length = 9;
-
-    // create the parentheses
     const insideLength = rand(1, length - 2);
 
     let afterLength;
@@ -21,15 +16,11 @@ function generateExpression(randomIterator: Iterator<number>) {
 
     const beforeLength = length - afterLength - insideLength - 2;
 
-    const before = fillExpression(beforeLength, rand, false, true);
-    const inside = fillExpression(insideLength, rand, false, false);
-    const after = fillExpression(afterLength, rand, true, false);
+    const before = fillExpression(beforeLength, rand, {padAfter: true});
+    const inside = fillExpression(insideLength, rand, {mustContainX: true});
+    const after = fillExpression(afterLength, rand, {padBefore: true});
 
-    const grouping = rand(0, 1)
-        ? ["[", "]"]
-        : ["[", "]"];
-
-    const expression = [...before, grouping[0], ...inside, grouping[1], ...after];
+    const expression = [...before, "d", ...inside, "v", ...after];
 
     return expression.join("");
 }

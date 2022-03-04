@@ -10,6 +10,9 @@ function App() {
       <main>
         <Game></Game>
       </main>
+      <footer>
+        <a href="https://github.com/willolsker/calcle">source</a> • <a href="https://github.com/willolsker/calcle/issues">report a bug</a>
+      </footer>
     </>
   );
 }

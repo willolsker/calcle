@@ -15,7 +15,9 @@ function Key(props: {input: keyof typeof symbols, row: number, column: number}) 
                 return prev;
             }
 
-            return {...prev, [game.row]: prev[game.row] + props.input};
+            const next = [...prev];
+            next[game.row] = prev[game.row] + props.input;
+            return next;
         });
     }, [props.input, game]);
 
@@ -31,9 +33,36 @@ function Key(props: {input: keyof typeof symbols, row: number, column: number}) 
         return () => window.removeEventListener("keydown", keydown);
     }, [props.input, addInput]);
 
+    let reveal: string | null = null;
+    Object.keys(game.inputs).forEach((_i) => {
+        const i = parseInt(_i);
+
+        if (
+            !isNaN(i)
+            && game.inputs[i] 
+            && game.inputs[i]?.includes(props.input)
+            && i < game.row
+        ) {
+            reveal = "answer wrong";
+            if (game.solution.includes(props.input)) {
+                reveal = "answer somewhere";
+                game.inputs.forEach((input, ii) => {
+                    if (ii < game.row) {
+                        const solutionArr = game.solution.split("");
+                        input.split("").forEach((_, iii) => {
+                            if (solutionArr[iii] === input[iii] && input[iii] === props.input) {
+                                reveal = "answer correct";
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    });
+
     return (
         <button 
-            className="key" 
+            className={"key " + (reveal ?? "")}
             style={{gridRow: props.row, gridColumn: props.column}}
             onMouseDown={addInput}
         >

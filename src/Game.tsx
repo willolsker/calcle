@@ -1,5 +1,5 @@
 import { utcToZonedTime } from 'date-fns-tz';
-import React, { createContext, Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { createContext, Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Latex from 'react-latex';
 import Keys from './components/Keys';
 import generateExpression from './lib/generateExpression';
@@ -7,40 +7,77 @@ import pseudoRandom from './lib/pseudoRandom';
 import simplifyExpression from './lib/simplifyExpression';
 import { symbols } from './lib/values';
 
-type Inputs = {[k: number]: string | undefined};
-export interface Game {
-    inputs: Inputs;
-    setInputs: Dispatch<SetStateAction<Inputs>>;
+export interface GameState {
+    inputs: string[];
+    setInputs: Dispatch<SetStateAction<string[]>>;
     row: number;
+    solution: string;
 }
-export const GameContext = createContext<Game>({inputs: {}, setInputs: () => {}, row: 0});
+export const GameContext = createContext<GameState>({inputs: [], setInputs: () => {}, row: 0, solution: ""});
 
 function Game() {
-    const [solution, setSolution] = useState<null | string>();
-
-    useEffect(() => {
-        const localDate = new Date();
-        const date = utcToZonedTime(localDate, "America/Los_Angeles");
-    
-        const prng = pseudoRandom(
-            date.getDate() + date.getMonth() + date.getFullYear()
-        )
-
-        for (let i = 0; i < 5; i++) {
-            const eq = generateExpression(prng);
-            setSolution(eq);
-        }
-    }, []);
-
-    const [inputs, setInputs] = useState<Game["inputs"]>({});
+    const [solution, setSolution] = useState<string>("");
+    const [inputs, setInputs] = useState<GameState["inputs"]>([]);
     const [row, setRow] = useState<number>(0);
-    const game = useMemo<Game>(() => ({inputs, setInputs, row}), [inputs, setInputs, row]);
+    const game = useMemo<GameState>(() => ({inputs, setInputs, row, solution}), [inputs, setInputs, row, solution]);
+
+    const [solved, setSolved] = useState<number | null>(null);
+    const [toast, setToast] = useState<null | string>(null);
+    useEffect(() => {
+        if (toast && row !== 9) {
+            setTimeout(() => setToast(null), 3000);
+        }
+    }, [toast, row]);
 
     const enter = useCallback(() => {
         const currentRow = inputs[row];
         if (currentRow?.length === 9) {
-            console.log(simplifyExpression(currentRow));
-            setRow(row + 1);
+            try {
+                if (simplifyExpression(currentRow).toString({implicit: "show"}) === simplifyExpression(solution).toString({implicit: "show"})) {
+                        setRow(row + 1);
+                        if (row + 1 === 9) {
+                            setTimeout(() => {
+                                setToast(`The correct answer was ${solution.split("").map((s) => "$" + symbols[s as keyof typeof symbols] + "$").join("")}`);
+                            }, 300);
+                        }
+                    } else {
+                    setToast("The expression that you entered is not equal to the specified solution.");
+                }
+            } catch {
+                setToast("The expression that you entered is not valid.");
+            }
+        }
+        if (currentRow === solution) {
+            console.log(currentRow, solution);
+            setSolved(row + 1);
+        }
+    }, [inputs, row, solution]);
+
+    const date = useRef(utcToZonedTime(new Date(), "America/Los_Angeles"));
+    useEffect(() => {
+        const dateId = date.current.getDate() + date.current.getMonth() + date.current.getFullYear();
+    
+        const prng = pseudoRandom(dateId);
+        const eq = generateExpression(prng);
+        setSolution(eq);
+
+        const savedInputs = JSON.parse(localStorage.getItem("savedInputs" + dateId)!);
+        if (savedInputs) {
+            setInputs(savedInputs.data.inputs);
+            setRow(savedInputs.data.row);
+            if (savedInputs.data.inputs.some((i: string) => i === eq)) {
+                setSolved(savedInputs.data.row + 1);
+            }
+            if (savedInputs.data.row === 9 && savedInputs.data.inputs[9] !== eq) {
+                setToast(`The correct answer was ${eq.split("").map((s) => "$" + symbols[s as keyof typeof symbols] + "$").join("")}`);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        if (inputs) {
+            const dateId = date.current.getDate() + date.current.getMonth() + date.current.getFullYear();
+            localStorage.setItem("savedInputs" + dateId, JSON.stringify({data: {inputs, row}}));
         }
     }, [inputs, row]);
 
@@ -53,9 +90,11 @@ function Game() {
                 return prev;
             }
 
-            return {...prev, [game.row]: prev[game.row]?.slice(0, -1)};
+            const next = [...prev];
+            next[game.row] = prev[game.row]?.slice(0, -1);
+            return next;
         });
-    }, [inputs]);
+    }, [game.row]);
 
     useEffect(() => {
         const keydown = (e: KeyboardEvent) => {
@@ -73,7 +112,6 @@ function Game() {
         const keydown = (e: KeyboardEvent) => {
             if (e.key === "Backspace" || e.key === "Delete") {
                 backspace();
-                window.removeEventListener("keydown", keydown);
             }
         }
 
@@ -104,7 +142,7 @@ function Game() {
                                         }
 
                                         return (
-                                            <td key={ii} className={reveal ? reveal : ""}>
+                                            <td key={ii} className={reveal ?? ""}>
                                                 {elRow && elRow[ii]
                                                     ? <Latex>{`$${symbols[(elRow[ii] as (keyof typeof symbols))]}$`}</Latex> 
                                                     : undefined
@@ -122,6 +160,15 @@ function Game() {
                         {`$=${simplifyExpression(solution).toTex().replace("\\cdot", "")}$`}
                     </Latex>}
                 </div>
+                {toast && <div className="alert">
+                    <Latex>{toast}</Latex>
+                </div>}
+                {solved && <div className="solved-modal-wrapper">
+                    <div className="solved-modal">
+                        <h1>{["Marvelous", "Excellent", "Well done", "Impressive", "Very nice"][Math.floor(Math.random() * 5)]}</h1>
+                        <h2>Statistics coming soon!</h2>
+                    </div>
+                </div>}
                 <div className="keys">
                     <Keys />
 

@@ -3,13 +3,13 @@ import Key from "./Key";
 function Keys() {
     return <>
         <Key input="x" column={1} row={1}/>
-        <Key input="@" column={2} row={1}/>
-        <Key input="<" column={1} row={2}/>
-        <Key input=">" column={2} row={2}/>
-        <Key input="[" column={1} row={3}/>
-        <Key input="]" column={2} row={3}/>
-        <Key input="+" column={1} row={4}/>
-        <Key input="-" column={2} row={4}/>
+        <Key input="^" column={2} row={1}/>
+        <Key input="d" column={1} row={2}/>
+        <Key input="v" column={2} row={2}/>
+        <Key input="+" column={1} row={3}/>
+        <Key input="-" column={2} row={3}/>
+        <Key input="*" column={1} row={4}/>
+        <Key input="/" column={2} row={4}/>
 
         <Key input="0" column={4} row={1}/>
         <Key input="1" column={5} row={1}/>
