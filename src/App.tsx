@@ -11,7 +11,7 @@ function App() {
         <Game></Game>
       </main>
       <footer>
-        <a href="https://github.com/willolsker/calcle">source</a> • <a href="https://github.com/willolsker/calcle/issues">report a bug</a>
+        <a href="https://github.com/willolsker/calcle" rel="noopener noreferrer" target="_blank">source</a> • <a href="https://github.com/willolsker/calcle/issues" rel="noopener noreferrer" target="_blank">report a bug</a>
       </footer>
     </>
   );
