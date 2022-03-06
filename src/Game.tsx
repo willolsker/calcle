@@ -130,10 +130,12 @@ function Game() {
 
                                         let reveal = null;
                                         if (i < row && elRow) {
-                                            if (solution![ii] === elRow[ii]) {
+                                            if (solution[ii] === elRow[ii]) {
                                                 reveal = "answer correct";
-                                            } else if (solution!.includes(elRow[ii])) {
-                                                reveal = "answer somewhere";
+                                            } else if (solution.split("").filter((char, j) => elRow[j] !== char).includes(elRow[ii])) {
+                                                if (solution.includes(elRow[ii])) {
+                                                    reveal = "answer somewhere";
+                                                }
                                             } else {
                                                 reveal = "answer wrong";
                                             }
