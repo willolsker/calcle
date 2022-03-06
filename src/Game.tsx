@@ -60,7 +60,7 @@ function Game() {
         const eq = generateExpression(prng);
         setSolution(eq);
 
-        const savedInputs = JSON.parse(localStorage.getItem("savedInputs" + dateId)!);
+        const savedInputs = JSON.parse(localStorage.getItem("savedInputs" + dateId.current)!);
         if (savedInputs) {
             setInputs(savedInputs.data.inputs);
             setRow(savedInputs.data.row);
