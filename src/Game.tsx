@@ -35,7 +35,7 @@ function Game() {
             try {
                 if (simplifyExpression(currentRow).toString({implicit: "show"}) === simplifyExpression(solution).toString({implicit: "show"})) {
                         setRow(row + 1);
-                        if (row + 1 === 9) {
+                        if (row + 1 === 9 && currentRow !== solution) {
                             setTimeout(() => {
                                 setToast(`The correct answer was ${solution.split("").map((s) => "$" + symbols[s as keyof typeof symbols] + "$").join("")}`);
                             }, 300);
@@ -48,7 +48,6 @@ function Game() {
             }
         }
         if (currentRow === solution) {
-            console.log(currentRow, solution);
             setSolved(row + 1);
         }
     }, [inputs, row, solution]);
@@ -67,7 +66,7 @@ function Game() {
             if (savedInputs.data.inputs.some((i: string) => i === eq)) {
                 setSolved(savedInputs.data.row + 1);
             }
-            if (savedInputs.data.row === 9 && savedInputs.data.inputs[9] !== eq) {
+            if (savedInputs.data.row === 9 && savedInputs.data.inputs[8] !== eq) {
                 setToast(`The correct answer was ${eq.split("").map((s) => "$" + symbols[s as keyof typeof symbols] + "$").join("")}`);
             }
         }
